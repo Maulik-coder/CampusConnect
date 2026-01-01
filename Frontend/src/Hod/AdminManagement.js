@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { useSidebar } from "../Context/SidebarContext";
-import HodSidebar from "../component/HodSidebar";
 
 export default function AdminManagement() {
   const { open } = useSidebar();
@@ -18,6 +17,7 @@ export default function AdminManagement() {
   const [form, setForm] = useState({
     name: "",
     username: "",
+    email: "",
     password: "",
   });
 
@@ -42,6 +42,12 @@ export default function AdminManagement() {
       )
     ) {
       newErrors.username = "Username already exists";
+    }
+
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
+      newErrors.email = "Invalid email address";
     }
 
     if (!form.password) {
@@ -71,9 +77,7 @@ export default function AdminManagement() {
       ...admins,
     ]);
 
-    setForm({ name: "", username: "", password: "" });
-    setErrors({});
-    setShowAddAdmin(false);
+    closeModal();
   };
 
   const toggleStatus = (index) => {
@@ -85,18 +89,16 @@ export default function AdminManagement() {
 
   const closeModal = () => {
     setShowAddAdmin(false);
-    setForm({ name: "", username: "", password: "" });
+    setForm({ name: "", username: "", email: "", password: "" });
     setErrors({});
   };
 
   /* ================= JSX ================= */
   return (
     <>
-      <HodSidebar />
-
       {/* ===== HEADER ===== */}
       <header
-        className={`fixed top-0 right-0 h-16 bg-white border-b flex items-center
+        className={`fixed top-0 right-0 h-16 bg-white flex items-center
         transition-all duration-300 z-30
         ${open ? "left-64" : "left-20"}`}
       >
@@ -110,10 +112,14 @@ export default function AdminManagement() {
 
           <div className="flex items-center gap-3">
             <div className="relative hidden md:block">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
               <input
                 placeholder="Search admin..."
-                className="w-72 pl-9 pr-4 py-2 rounded-lg border text-sm focus:ring-2 focus:ring-violet-200 outline-none"
+                className="w-72 pl-9 pr-4 py-2 rounded-lg border text-sm
+                focus:ring-2 focus:ring-violet-200 outline-none"
               />
             </div>
 
@@ -151,16 +157,20 @@ export default function AdminManagement() {
                   <tr key={i} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <p className="font-medium">{admin.name}</p>
-                      <p className="text-xs text-gray-500">Created: {admin.date}</p>
+                      <p className="text-xs text-gray-500">
+                        Created: {admin.date}
+                      </p>
                     </td>
                     <td className="px-6 py-4 font-mono">{admin.username}</td>
                     <td className="px-6 py-4 text-gray-400">••••••••</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs ${
-                        admin.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs ${
+                          admin.status === "Active"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
                         ● {admin.status}
                       </span>
                     </td>
@@ -173,7 +183,9 @@ export default function AdminManagement() {
                             : "bg-blue-50 text-blue-600"
                         }`}
                       >
-                        {admin.status === "Active" ? "Deactivate" : "Activate"}
+                        {admin.status === "Active"
+                          ? "Deactivate"
+                          : "Activate"}
                       </button>
                     </td>
                   </tr>
@@ -188,51 +200,47 @@ export default function AdminManagement() {
       {showAddAdmin && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
           <div className="bg-white w-full max-w-xl rounded-xl shadow-xl overflow-hidden">
-
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-sm text-blue-700">
               New admin accounts are created as <b>Active</b> by default.
             </div>
 
             <div className="p-6 space-y-4">
-              {/* Name */}
-              <div>
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Admin Full Name"
-                  className={`w-full px-4 py-2 border rounded-lg text-sm
-                  ${errors.name ? "border-red-500" : ""}`}
-                />
-                <p className="text-xs text-red-500 mt-1">{errors.name}</p>
-              </div>
+              {/* Full Name */}
+              <InputField
+                label="Admin Full Name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                error={errors.name}
+              />
 
               {/* Username */}
-              <div>
-                <input
-                  name="username"
-                  value={form.username}
-                  onChange={handleChange}
-                  placeholder="Username"
-                  className={`w-full px-4 py-2 border rounded-lg text-sm
-                  ${errors.username ? "border-red-500" : ""}`}
-                />
-                <p className="text-xs text-red-500 mt-1">{errors.username}</p>
-              </div>
+              <InputField
+                label="Username"
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                error={errors.username}
+              />
+
+              {/* Email */}
+              <InputField
+                label="Email Address"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                error={errors.email}
+              />
 
               {/* Password */}
-              <div>
-                <input
-                  name="password"
-                  type="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="Password"
-                  className={`w-full px-4 py-2 border rounded-lg text-sm
-                  ${errors.password ? "border-red-500" : ""}`}
-                />
-                <p className="text-xs text-red-500 mt-1">{errors.password}</p>
-              </div>
+              <InputField
+                label="Password"
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                error={errors.password}
+              />
             </div>
 
             <div className="flex justify-end gap-3 bg-gray-50 px-6 py-4 border-t">
@@ -255,5 +263,20 @@ export default function AdminManagement() {
         </div>
       )}
     </>
+  );
+}
+
+/* ================= INPUT COMPONENT ================= */
+function InputField({ label, error, ...props }) {
+  return (
+    <div>
+      <input
+        {...props}
+        placeholder={label}
+        className={`w-full px-4 py-2 border rounded-lg text-sm
+        ${error ? "border-red-500" : "border-gray-300"}`}
+      />
+      <p className="text-xs mt-1 min-h-[16px] text-red-500">{error}</p>
+    </div>
   );
 }

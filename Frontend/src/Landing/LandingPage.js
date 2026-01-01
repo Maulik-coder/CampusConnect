@@ -8,15 +8,12 @@ import { Link } from "react-router-dom";
 
 export default function UniversityPortal() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="bg-gray-50 flex flex-col">
 
-      {/* Navbar */}
       
 
-      {/* Main Content */}
       <main className="flex-1">
 
-        {/* Hero Section */}
         <section className="text-center mt-20 px-4">
           <span className="inline-block mb-4 px-4 py-1 rounded-full bg-violet-100 text-violet-600 text-sm font-medium">
             Start Your Session
@@ -31,9 +28,8 @@ export default function UniversityPortal() {
           </p>
         </section>
 
-        {/* Role Cards */}
         <section className="container mx-auto mt-16 px-4 grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <Link to="/AdminLogin">
+          <Link to="/admin-login">
             <RoleCard
               title="Admin"
               description="Manage users, configure system settings, and oversee platform integrity."
@@ -42,7 +38,7 @@ export default function UniversityPortal() {
               image={admin}
             />
           </Link>
-          <Link to="FacultyLogin" >
+          <Link to="faculty-login" >
             <RoleCard
               title="Faculty"
               description="Organize courses, grade assignments, and track student progress."
@@ -51,7 +47,7 @@ export default function UniversityPortal() {
               image={faculty}
             />
           </Link>
-          <Link to="StudentLogin" >
+          <Link to="student-login" >
             <RoleCard
               title="Student"
               description="Check your timetable, submit work, and view your academic results."
@@ -72,7 +68,6 @@ export default function UniversityPortal() {
         </section>
       </main>
 
-      {/* Footer */}
       
     </div >
   );

@@ -78,7 +78,7 @@ export default function HodLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-white via-white to-sky-50 flex flex-col">
+    <div className="from-white via-white to-sky-50 flex flex-col">
       <main className="flex-1 flex items-center justify-center px-6">
         <div className="max-w-6xl w-full bg-white rounded-2xl shadow-xl grid grid-cols-1 md:grid-cols-2 overflow-hidden">
 

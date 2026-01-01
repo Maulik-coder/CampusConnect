@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useSidebar } from "../Context/SidebarContext";
-import HodSidebar from "../component/HodSidebar";
 
 export default function Notices() {
   const { open } = useSidebar();
@@ -43,7 +42,6 @@ export default function Notices() {
   return (
     <>
       {/* ===== SIDEBAR ===== */}
-      <HodSidebar />
 
       {/* ===== HEADER (RIGHT SIDE STATIC) ===== */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b z-30">

@@ -4,18 +4,19 @@ import { Search, CheckCircle, XCircle, Building2 } from "lucide-react";
 export default function Reports({ open = true }) {
   const [activeTab, setActiveTab] = useState("fee");
 
-  const sidebarWidth = open ? "ml-64" : "ml-20";
+  const sidebarWidth = open ? "ml-10" : "ml-10";
 
   return (
     <>
       {/* ================= HEADER ================= */}
       <header
         className={`
-          fixed top-0 h-16 z-30 bg-white border-b
-          transition-all duration-300
-          ${open ? " w-[calc(100%)]" : " w-[calc(100%)]"}
-        `}
+        fixed top-0 h-16 z-30 bg-white border-b
+        transition-all duration-300
+        ${open ? "w-[calc(100%)]" : "w-[calc(100%)]"}
+      `}
       >
+
 
         <div className="h-full flex items-center px-6">
           <h1 className="flex items-center gap-2 font-semibold text-gray-800">
@@ -23,7 +24,7 @@ export default function Reports({ open = true }) {
             Reports
           </h1>
 
-          
+
         </div>
       </header>
 

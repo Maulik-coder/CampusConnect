@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route} from "react-router-dom";
 
 /* ===== Layouts ===== */
 import LoginLayout from "../Layout/LoginLayout";
@@ -47,12 +47,13 @@ export default function AppRoutes() {
         </Route>
 
         {/* ================= HOD DASHBOARD ================= */}
+       
         <Route path="/hod" element={<HodLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />}/>
           <Route path="adminmanagement" element={<AdminManagement />} />
           <Route path="notices" element={<Notices />} />
-          <Route path="reports" element={<Reports />} />
+          <Route path="reports" element={<Reports />} />        
         </Route>
         {/* <Route path="/" element={<Dashboard />} /> */}
 

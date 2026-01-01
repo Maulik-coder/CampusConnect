@@ -1,17 +1,22 @@
 import { Link } from "react-router-dom";
-import { GraduationCap } from "lucide-react";
-import { useState } from "react";
+import Logo from "../Assets/Logo.png";
 
 
 export default function Header() {
-    const [open, setOpen] = useState(false);
+   
     return (
-        <header className="bg-white border-b">
+        <header className="bg-white border-r">
             <div className="container mx-auto flex items-center justify-between px-4 py-4">
-             
+
                 <div className="flex items-center gap-2 text-xl font-semibold text-gray-800">
-                    <GraduationCap className="w-6 h-6 text-violet-600" />
-                    University Portal
+                    <img
+                        src={Logo}
+                        alt="Logo"
+                        className="w-10 h-10 object-contain"
+                    />
+
+                    <span>Campus Connect</span>
+
                 </div>
 
                 <div className="hidden md:flex items-center gap-6 text-sm">
