@@ -1,43 +1,31 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useSidebar } from "../Context/SidebarContext";
-
+import { useEffect } from "react";
+import api from "../api/axiosConfig";
 export default function Notices() {
   const { open } = useSidebar();
   const [activeIndex, setActiveIndex] = useState(null);
+const [notices, setNotices] = useState([]);
+const [loading, setLoading] = useState(true);
 
-  const notices = [
-    {
-      title: "Semester Final Exam Schedule Released",
-      date: "Oct 24, 2023",
-      content:
-        "The final examination schedule for all departments has been released. Please review the timetable and inform students accordingly.",
-    },
-    {
-      title: "Campus Maintenance Alert: Library Wing",
-      date: "Oct 20, 2023",
-      content:
-        "The library wing will undergo maintenance from Oct 22–24. Limited access will be available during this period.",
-    },
-    {
-      title: "New Faculty Orientation Program",
-      date: "Oct 15, 2023",
-      content:
-        "An orientation program for newly joined faculty members will be conducted in the seminar hall.",
-    },
-    {
-      title: "Updated COVID-19 Campus Guidelines",
-      date: "Oct 10, 2023",
-      content:
-        "Updated health and safety guidelines have been issued. All departments must ensure compliance.",
-    },
-    {
-      title: "Annual Budget Submission Deadline",
-      date: "Sep 28, 2023",
-      content:
-        "Departments must submit their annual budget proposals before the deadline.",
-    },
-  ];
+useEffect(() => {
+  fetchNotices();
+}, []);
+
+const fetchNotices = async () => {
+  try {
+    const response = await api.get("/hod/notices");
+    if (response.data.status === "SUCCESS") {
+      // 💡 Match the data array from your ResponseDTO
+      setNotices(response.data.data); 
+    }
+  } catch (err) {
+    console.error("Failed to fetch notices:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
@@ -74,47 +62,49 @@ export default function Notices() {
               <h2 className="text-2xl font-bold text-gray-900">Notices</h2>
             </div>
 
-            {/* ===== NOTICE LIST ===== */}
-            <div className="space-y-4">
-              {notices.map((notice, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-xl border shadow-sm"
-                >
-                  <button
-                    onClick={() =>
-                      setActiveIndex(activeIndex === index ? null : index)
-                    }
-                    className="w-full flex items-center justify-between px-5 py-4 text-left"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-blue-500 mt-1" />
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {notice.title}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {notice.date}
-                        </p>
-                      </div>
-                    </div>
-
-                    <ChevronDown
-                      size={18}
-                      className={`text-gray-400 transition-transform ${
-                        activeIndex === index ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {activeIndex === index && (
-                    <div className="px-6 pb-4 text-sm text-gray-600">
-                      {notice.content}
-                    </div>
-                  )}
-                </div>
-              ))}
+          <div className="space-y-4">
+  {loading ? (
+    <p className="text-center text-gray-500 py-4">Loading notices...</p>
+  ) : notices.length > 0 ? (
+    notices.map((notice, index) => (
+      <div key={notice.noticeId || index} className="bg-white rounded-xl border shadow-sm">
+        <button
+          onClick={() => setActiveIndex(activeIndex === index ? null : index)}
+          className="w-full flex items-center justify-between px-5 py-4 text-left"
+        >
+          <div className="flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-blue-500 mt-1" />
+            <div>
+              <p className="font-medium text-gray-900">
+                {/* 💡 Use noticeTitle from Java Model */}
+                {notice.noticeTitle}
+              </p>
+              <p className="text-xs text-gray-500">
+                {/* Format the date if you have a createdAt field */}
+                {notice.createdAt ? new Date(notice.createdAt).toLocaleDateString() : "Recent"}
+              </p>
             </div>
+          </div>
+          <ChevronDown
+            size={18}
+            className={`text-gray-400 transition-transform ${
+              activeIndex === index ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {activeIndex === index && (
+          <div className="px-6 pb-4 text-sm text-gray-600 border-t pt-3">
+            {/* 💡 Use noticeContent from Java Model */}
+            {notice.noticeContent}
+          </div>
+        )}
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-500 py-4">No notices available.</p>
+  )}
+</div>
           </div>
         </div>
       </main>

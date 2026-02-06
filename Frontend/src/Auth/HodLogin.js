@@ -28,55 +28,41 @@ export default function HodLogin() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+/* ================= Updated Submit Logic ================= */
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
 
-  /* ================= Submit ================= */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  setLoading(true);
 
-    setLoading(true);
+  try {
+    const response = await axios.post("http://localhost:8080/u/login", {
+      email: email,
+      rawPassword: password,
+      role: "HOD",
+    });
 
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/u/login",
-        {
-          email,
-          rawPassword: password,
-          role: "HOD",
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    // ✅ Fix: Access the nested 'data' object from your ResponseDTO
+    // response.data is the whole DTO
+    // response.data.data is the Map containing the token
+    const token = response.data?.data?.token;
 
-      const token =
-        typeof response.data === "string"
-          ? response.data
-          : response.data?.token;
-
-      if (!token) {
-        throw new Error("Invalid login response");
-      }
-
-      localStorage.setItem("token", token);
-
-      // ✅ HARD redirect to dashboard
-      navigate("/hod/dashboard", { replace: true });
-
-    } catch (error) {
-      console.error("Login error:", error);
-      alert(
-        error.response?.data?.message ||
-        error.message ||
-        "Login failed"
-      );
-    } finally {
-      setLoading(false);
+    if (!token) {
+      // If we reach here, the backend returned SUCCESS but no token was found
+      throw new Error(response.data?.message || "Invalid login response");
     }
-  };
 
+    localStorage.setItem("token", token);
+    navigate("/hod/dashboard", { replace: true });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    // This will now show "Invalid credentials" or "Role does not match" if the backend sent it
+    alert(error.response?.data?.message || error.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="from-white via-white to-sky-50 flex flex-col">
       <main className="flex-1 flex items-center justify-center px-6">

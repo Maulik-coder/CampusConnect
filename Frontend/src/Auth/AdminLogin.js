@@ -196,30 +196,44 @@ export default function AdminLogin() {
   };
 
   // Submit handler
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
 
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/u/login",
-        {
-          email,
-          rawPassword: password,
-          role: "ADMIN",
-        }
-      );
+  try {
+    const response = await axios.post(
+      "http://localhost:8080/u/login",
+      
+      {
+        email: email,
+        rawPassword: password, // 💡 Ensure LoginDTO in Java uses 'rawPassword'
+        role: "ADMIN",
+      }
+    );
 
-      const token = response.data;
+    // 💡 Logic: Access the ResponseDTO structure
+    const result = response.data; 
+
+    if (result.status === "SUCCESS") {
+      // result.data contains the token sent from AuthService
+      const token = result.data; 
+      
+      if (!token) {
+        throw new Error("Login successful but no token received");
+      }
+
       localStorage.setItem("token", token);
-
       navigate("/admin/dashboard");
-    } catch (error) {
-      setErrors({
-        general: error.response?.data || "Invalid credentials",
-      });
+    } else {
+      // Show the actual error message from the backend
+      setErrors({ general: result.message || "Invalid credentials" });
     }
-  };
+  } catch (error) {
+    setErrors({
+      general: error.response?.data?.message || "Invalid credentials or Server down",
+    });
+  }
+};
 
   return (
     <div className="from-white via-white to-sky-50 flex items-center justify-center px-6">

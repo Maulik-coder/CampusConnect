@@ -138,7 +138,7 @@
 //                 Log In →
 //               </button> 
 
-              
+
 //             </form>
 
 //             <p className="text-sm text-gray-500 mt-6 text-center">
@@ -163,40 +163,61 @@ import {
   MessageSquare,
   ChevronDown,
 } from "lucide-react";
+import { useEffect } from "react";
+import api from "../api/axiosConfig";
 import HodHeader from "../component/HodHead";
 import { useSidebar } from "../Context/SidebarContext";
 
 export default function Dashboard() {
   const { open } = useSidebar();
   const [activeNotice, setActiveNotice] = useState(null);
+  // 1. Create a state to hold the stats object
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    totalFaculty: 0,
+    totalAdmins: 0,
+    feeStatusCounts: { PAID: 0, PENDING: 0 },
+    unreadFeedback: 0
+  });
 
-  const notices = [
-    {
-      title: "Mid-Term Examination Schedule Released",
-      date: "Oct 12, 2023",
-      content:
-        "The mid-term examination schedule has been published. Please ensure all departments communicate the timetable to students."
-    },
-    {
-      title: "Faculty Meeting: Curriculum Review",
-      date: "Oct 10, 2023",
-      content:
-        "A faculty meeting is scheduled to review the curriculum changes for the upcoming semester."
-    },
-    {
-      title: "Holiday Announcement: Diwali Break",
-      date: "Oct 08, 2023",
-      content:
-        "The university will remain closed during the Diwali holidays as per the academic calendar."
-    },
-    {
-      title: "Campus Maintenance Update",
-      date: "Oct 05, 2023",
-      content:
-        "Maintenance work will be carried out in academic blocks. Minor disruptions may occur."
-    },
-  ];
+  // 2. Fetch data from backend on component mount
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await api.get("/hod/dashboard/stats");
+        // We access .data.data because of your ResponseDTO structure
+        if (response.data.status === "SUCCESS") {
+          setStats(response.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      }
+    };
 
+    fetchDashboardData();
+  }, []);
+
+
+
+  // 1. Create a state to hold the live notices
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchNotices = async () => {
+      try {
+        const response = await api.get("/hod/notices");
+        if (response.data.status === "SUCCESS") {
+          setNotices(response.data.data); // Update state with backend data
+        }
+      } catch (error) {
+        console.error("Error loading notices:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotices();
+  }, []);
   return (
     <main
       className={`pt-20 px-6 py-8 bg-gray-50 min-h-screen transition-all duration-300
@@ -211,14 +232,45 @@ export default function Dashboard() {
         </h1>
       </div>
 
-      {/* ================= STATS ================= */}
+      {/* ================= STATS (NOW DYNAMIC) ================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        <StatCard title="TOTAL STUDENTS" value="1,240" color="blue" icon={Users} />
-        <StatCard title="TOTAL FACULTY" value="85" color="emerald" icon={UserCheck} />
-        <StatCard title="TOTAL ADMINS" value="12" color="indigo" icon={Shield} />
-        <StatCard title="FEES PAID COUNT" value="950" color="green" icon={IndianRupee} />
-        <StatCard title="FEES UNPAID COUNT" value="290" color="orange" icon={AlertCircle} />
-        <StatCard title="UNREAD FEEDBACK" value="5" color="rose" icon={MessageSquare} />
+        <StatCard
+          title="TOTAL STUDENTS"
+          value={stats.totalStudents}
+          color="blue"
+          icon={Users}
+        />
+        <StatCard
+          title="TOTAL FACULTY"
+          value={stats.totalFaculty}
+          color="emerald"
+          icon={UserCheck}
+        />
+        <StatCard
+          title="TOTAL ADMINS"
+          value={stats.totalAdmins}
+          color="indigo"
+          icon={Shield}
+        />
+        
+        <StatCard
+          title="FEES PAID COUNT"
+          value={stats.feeStatusCounts?.PAID || 0}
+          color="green"
+          icon={IndianRupee}
+        />
+        <StatCard
+          title="FEES UNPAID COUNT"
+          value={stats.feeStatusCounts?.PENDING || 0}
+          color="orange"
+          icon={AlertCircle}
+        />
+        <StatCard
+          title="UNREAD FEEDBACK"
+          value={stats.unreadFeedback}
+          color="rose"
+          icon={MessageSquare}
+        />
       </div>
 
       {/* ================= RECENT NOTICES ================= */}
@@ -227,40 +279,55 @@ export default function Dashboard() {
           Recent Notices
         </h3>
 
+        {/* ================= RECENT NOTICES (DYNAMIC) ================= */}
+        {/* <div> */}
+
+
         <div className="bg-white rounded-xl border shadow-sm divide-y">
-          {notices.map((notice, index) => (
-            <div key={index}>
-              {/* HEADER ROW */}
-              <button
-                onClick={() =>
-                  setActiveNotice(activeNotice === index ? null : index)
-                }
-                className="w-full flex items-center justify-between px-4 py-4 text-left hover:bg-gray-50 transition"
-              >
-                <div>
-                  <p className="text-sm font-medium text-gray-800">
-                    {notice.title}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Posted on {notice.date}
-                  </p>
-                </div>
+          {loading ? (
+            <p className="p-4 text-center text-gray-500 italic">Loading notices...</p>
+          ) : notices.length > 0 ? (
+            notices.map((notice, index) => (
+              <div key={notice.id || index}> {/* Using ID from database if available */}
+                {/* HEADER ROW */}
+                <button
+                  onClick={() => setActiveNotice(activeNotice === index ? null : index)}
+                  className="w-full flex items-center justify-between px-4 py-4 text-left hover:bg-gray-50 transition"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      {notice.noticeTitle} {/* Changed from notice.title */}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {/* 💡 Safely check for createdAt and format it */}
+                      Posted on {notice.createdAt
+                        ? new Date(notice.createdAt).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric'
+                        })
+                        : "Recently"}
+                    </p>
+                  </div>
 
-                <ChevronDown
-                  size={18}
-                  className={`text-gray-400 transition-transform
-                    ${activeNotice === index ? "rotate-180" : ""}`}
-                />
-              </button>
+                  <ChevronDown
+                    size={18}
+                    className={`text-gray-400 transition-transform
+                ${activeNotice === index ? "rotate-180" : ""}`}
+                  />
+                </button>
 
-              {/* EXPANDED CONTENT */}
-              {activeNotice === index && (
-                <div className="px-6 pb-4 text-sm text-gray-600">
-                  {notice.content}
-                </div>
-              )}
-            </div>
-          ))}
+                {/* EXPANDED CONTENT */}
+                {activeNotice === index && (
+                  <div className="px-6 pb-4 text-sm text-gray-600 border-t pt-2 bg-gray-50/50">
+                    {notice.noticeContent} {/* Changed from notice.content */}
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="p-4 text-center text-gray-500 italic">No official notices published yet.</p>
+          )}
         </div>
       </div>
     </main>
